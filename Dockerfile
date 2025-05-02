@@ -1,14 +1,10 @@
-# Usa Temurin JDK 17 oficial (multiplataforma)
-FROM eclipse-temurin:17
-
-# Directorio de la app
+FROM gradle:8.0.2-jdk17 AS build
+COPY . /app
 WORKDIR /app
+RUN gradle build --no-daemon
 
-# Copiar JAR compilado
-COPY build/libs/*.jar app.jar
-
-# Exponer puerto (ajústalo si no es 8080)
+FROM eclipse-temurin:17
+WORKDIR /app
+COPY --from=build /app/build/libs/*.jar app.jar
 EXPOSE 8080
-
-# Comando para ejecutar la app
 ENTRYPOINT ["java", "-jar", "app.jar"]
