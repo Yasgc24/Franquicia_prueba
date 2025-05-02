@@ -2,9 +2,7 @@ package com.prueba.franquicia.service;
 
 import com.prueba.franquicia.model.Franquicia;
 import com.prueba.franquicia.model.Sucursal;
-import com.prueba.franquicia.model.Producto;
 import com.prueba.franquicia.repository.FranquiciaRepository;
-import com.prueba.franquicia.service.FranquiciaService.ProductoConSucursal;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,7 +11,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
-import reactor.core.publisher.Flux;
 import org.bson.types.ObjectId;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -38,6 +35,7 @@ class FranquiciaServiceTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
         franquicia = new Franquicia("Perritos");
+        sucursal = new Sucursal("Sucursal 1");
     }
 
     @Test
@@ -58,10 +56,11 @@ class FranquiciaServiceTest {
             return Mono.just(f);
         });
 
-        Mono<Franquicia> result = franquiciaService.actualizarNombreFranquicia("1", "Perritos 1");
+        String nuevoNombre = "Perritos 1";
+        Mono<Franquicia> result = franquiciaService.actualizarNombreFranquicia("1", nuevoNombre);
 
         StepVerifier.create(result)
-            .expectNextMatches(f -> "Franquicia Actualizada".equals(f.getNombre()))
+            .expectNextMatches(f -> nuevoNombre.equals(f.getNombre()))
             .verifyComplete();
     }
 
