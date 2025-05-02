@@ -1,9 +1,12 @@
 package com.prueba.franquicia.service;
 
 import com.prueba.franquicia.model.Franquicia;
+import com.prueba.franquicia.model.Sucursal;
 import com.prueba.franquicia.repository.FranquiciaRepository;
+import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
+
 
 @Service
 public class FranquiciaService {
@@ -33,7 +36,7 @@ public class FranquiciaService {
     public Mono<Franquicia> agregarSucursal(String franquiciaId, Sucursal sucursal) {
         return franquiciaRepository.findById(franquiciaId)
             .flatMap(franquicia -> {
-                sucursal.setId(new ObjectId()); // Generar ObjectId para la sucursal
+                sucursal.setId(new ObjectId());
                 franquicia.getSucursales().add(sucursal);
                 return franquiciaRepository.save(franquicia);
             });
