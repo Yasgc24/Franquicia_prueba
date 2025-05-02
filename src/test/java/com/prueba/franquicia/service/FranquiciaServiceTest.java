@@ -2,7 +2,9 @@ package com.prueba.franquicia.service;
 
 import com.prueba.franquicia.model.Franquicia;
 import com.prueba.franquicia.model.Sucursal;
+import com.prueba.franquicia.model.Producto;
 import com.prueba.franquicia.repository.FranquiciaRepository;
+import com.prueba.franquicia.service.FranquiciaService.ProductoConSucursal;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,6 +13,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+import reactor.core.publisher.Flux;
 import org.bson.types.ObjectId;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
