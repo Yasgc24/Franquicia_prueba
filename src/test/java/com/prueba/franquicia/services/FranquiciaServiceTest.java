@@ -38,6 +38,8 @@ class FranquiciaServiceTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
         franquicia = new Franquicia("Perritos");
+        sucursal = new Sucursal("Sucursal 1");
+        producto = new Producto("Producto 1", 50);
     }
 
     @Test
@@ -58,10 +60,11 @@ class FranquiciaServiceTest {
             return Mono.just(f);
         });
 
-        Mono<Franquicia> result = franquiciaService.actualizarNombreFranquicia("1", "Perritos 1");
+        String nuevoNombre = "Perritos 1";
+        Mono<Franquicia> result = franquiciaService.actualizarNombreFranquicia("1", nuevoNombre);
 
         StepVerifier.create(result)
-            .expectNextMatches(f -> "Franquicia Actualizada".equals(f.getNombre()))
+            .expectNextMatches(f -> nuevoNombre.equals(f.getNombre()))
             .verifyComplete();
     }
 
@@ -73,6 +76,39 @@ class FranquiciaServiceTest {
 
         StepVerifier.create(result)
             .expectError(RuntimeException.class)
+            .verify();
+    }
+
+    @Test
+    void testProductoConMasStockPorSucursal() {
+        ObjectId franquiciaId = new ObjectId();
+        ObjectId sucursalId = new ObjectId();
+        
+        Producto productoMayorStock = new Producto("Producto x", 100);
+        Producto productoMenorStock = new Producto("Producto y", 50);
+        
+        Sucursal sucursal = new Sucursal("Sucursal principal");
+        sucursal.setId(sucursalId);
+        sucursal.agregarProducto(productoMayorStock);
+        sucursal.agregarProducto(productoMenorStock);
+        
+        Franquicia franquicia = new Franquicia("Franquicia 1");
+        franquicia.setId(franquiciaId);
+        franquicia.agregarSucursal(sucursal);
+        
+        when(franquiciaRepository.findById(franquiciaId.toString()))
+            .thenReturn(Mono.just(franquicia));
+        
+        Flux<ProductoConSucursal> result = franquiciaService.productoConMasStockPorSucursal(franquiciaId.toString());
+        
+        StepVerifier.create(result)
+            .expectNextMatches(productoConSucursal -> {
+                return productoConSucursal.getProducto().getNombre().equals("Producto x") &&
+                    productoConSucursal.getProducto().getStock() == 100 &&
+                    productoConSucursal.getSucursalId().equals(sucursalId.toString()) &&
+                    productoConSucursal.getSucursalNombre().equals("Sucursal principal");
+            })
+            .expectComplete()
             .verify();
     }
 }
