@@ -22,6 +22,16 @@ public class Franquicia {
         this.nombre = nombre;
     }
 
+    public Franquicia() {
+        this.sucursales = new ArrayList<>();
+    }
+
+    public Franquicia(String id, String nombre, List<Sucursal> sucursales) {
+        this.id = id;
+        this.nombre = nombre;
+        this.sucursales = sucursales != null ? sucursales : new ArrayList<>();
+    }
+
     public String getId() {
         return id;
     }
