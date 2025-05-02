@@ -281,12 +281,23 @@ class FranquiciaControllerTest {
     @Test
     void productoConMasStockPorSucursal() {
         String franquiciaId = "1";
-        FranquiciaService.ProductoConSucursal productoConSucursal1 = new FranquiciaService.ProductoConSucursal("Producto X", 10, "Sucursal X");
-        FranquiciaService.ProductoConSucursal productoConSucursal2 = new FranquiciaService.ProductoConSucursal("Producto Y", 20, "Sucursal Y");
-        List<FranquiciaService.ProductoConSucursal> productosConStock = Arrays.asList(productoConSucursal1, productoConSucursal2);
-        when(franquiciaService.productoConMasStockPorSucursal(franquiciaId)).thenReturn(Flux.fromIterable(productosConStock));
+    
+        Producto producto1 = new Producto("Producto X", 10);
+        Producto producto2 = new Producto("Producto Y", 20);
+        
+        FranquiciaService.ProductoConSucursal productoConSucursal1 = 
+                new FranquiciaService.ProductoConSucursal(producto1, "123", "Sucursal X");
+        FranquiciaService.ProductoConSucursal productoConSucursal2 = 
+                new FranquiciaService.ProductoConSucursal(producto2, "145", "Sucursal Y");
+        
+        List<FranquiciaService.ProductoConSucursal> productosConStock = 
+                Arrays.asList(productoConSucursal1, productoConSucursal2);
 
-        Flux<FranquiciaService.ProductoConSucursal> response = franquiciaController.productoConMasStockPorSucursal(franquiciaId);
+        when(franquiciaService.productoConMasStockPorSucursal(franquiciaId))
+                .thenReturn(Flux.fromIterable(productosConStock));
+
+        Flux<FranquiciaService.ProductoConSucursal> response = 
+                franquiciaController.productoConMasStockPorSucursal(franquiciaId);
 
         StepVerifier.create(response)
                 .expectNext(productoConSucursal1)
@@ -294,5 +305,5 @@ class FranquiciaControllerTest {
                 .verifyComplete();
 
         verify(franquiciaService, times(1)).productoConMasStockPorSucursal(franquiciaId);
-    }
+   }
 }
