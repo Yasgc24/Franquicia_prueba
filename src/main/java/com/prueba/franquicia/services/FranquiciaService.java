@@ -28,4 +28,31 @@ public class FranquiciaService {
                 return franquiciaRepository.save(franquicia);
             });
     }
+
+    // Metodo para agregar una sucursal a una franquicia
+    public Mono<Franquicia> agregarSucursal(String franquiciaId, Sucursal sucursal) {
+        return franquiciaRepository.findById(franquiciaId)
+            .flatMap(franquicia -> {
+                sucursal.setId(new ObjectId()); // Generar ObjectId para la sucursal
+                franquicia.getSucursales().add(sucursal);
+                return franquiciaRepository.save(franquicia);
+            });
+    }
+
+    // Metodo para actualizar el nombre de una sucursal
+    public Mono<Franquicia> actualizarNombreSucursal(String franquiciaId, String sucursalId, String nuevoNombre) {
+        return franquiciaRepository.findById(franquiciaId)
+            .switchIfEmpty(Mono.error(new RuntimeException("Franquicia no encontrada")))
+            .flatMap(franquicia -> {
+                ObjectId objectIdSucursalId = new ObjectId(sucursalId);
+
+                Sucursal sucursal = franquicia.getSucursales().stream()
+                    .filter(s -> s.getId().equals(objectIdSucursalId))
+                    .findFirst()
+                    .orElseThrow(() -> new RuntimeException("Sucursal no encontrada"));
+
+                sucursal.setNombre(nuevoNombre);
+                return franquiciaRepository.save(franquicia);
+            });
+    }
 }
