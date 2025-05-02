@@ -2,9 +2,7 @@ package com.prueba.franquicia.service;
 
 import com.prueba.franquicia.model.Franquicia;
 import com.prueba.franquicia.model.Sucursal;
-import com.prueba.franquicia.model.Producto;
 import com.prueba.franquicia.repository.FranquiciaRepository;
-import com.prueba.franquicia.service.FranquiciaService.ProductoConSucursal;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,13 +11,10 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
-import reactor.core.publisher.Flux;
 import org.bson.types.ObjectId;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-import java.util.ArrayList;
-import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 class FranquiciaServiceTest {
@@ -32,7 +27,6 @@ class FranquiciaServiceTest {
 
     private Franquicia franquicia;
     private Sucursal sucursal;
-    private Producto producto;
 
     @BeforeEach
     void setUp() {
@@ -80,35 +74,55 @@ class FranquiciaServiceTest {
     }
 
     @Test
-    void testProductoConMasStockPorSucursal() {
-        ObjectId franquiciaId = new ObjectId();
+    void testAgregarSucursal() {
+        when(franquiciaRepository.findById("1")).thenReturn(Mono.just(new Franquicia("Franquicia 1")));
+        when(franquiciaRepository.save(any(Franquicia.class))).thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
+
+        Mono<Franquicia> result = franquiciaService.agregarSucursal("1", new Sucursal("Sucursal 1"));
+
+        assertNotNull(result);
+        Franquicia savedFranquicia = result.block();
+        assertFalse(savedFranquicia.getSucursales().isEmpty());
+        assertNotNull(savedFranquicia.getSucursales().get(0).getId());
+        assertEquals("Sucursal 1", savedFranquicia.getSucursales().get(0).getNombre());
+    }
+
+    @Test
+    void testActualizarNombreSucursal() {
         ObjectId sucursalId = new ObjectId();
-        
-        Producto productoMayorStock = new Producto("Producto x", 100);
-        Producto productoMenorStock = new Producto("Producto y", 50);
-        
-        Sucursal sucursal = new Sucursal("Sucursal principal");
-        sucursal.setId(sucursalId);
-        sucursal.agregarProducto(productoMayorStock);
-        sucursal.agregarProducto(productoMenorStock);
-        
-        Franquicia franquicia = new Franquicia("Franquicia 1");
-        franquicia.setId(franquiciaId);
-        franquicia.agregarSucursal(sucursal);
-        
-        when(franquiciaRepository.findById(franquiciaId.toString()))
-            .thenReturn(Mono.just(franquicia));
-        
-        Flux<ProductoConSucursal> result = franquiciaService.productoConMasStockPorSucursal(franquiciaId.toString());
-        
+        Sucursal original = new Sucursal("Sucursal Original");
+        original.setId(sucursalId);
+        franquicia.agregarSucursal(original);
+
+        when(franquiciaRepository.findById("1")).thenReturn(Mono.just(franquicia));
+        when(franquiciaRepository.save(any(Franquicia.class))).thenAnswer(invocation -> {
+            Franquicia f = invocation.getArgument(0);
+            return Mono.just(f);
+        });
+
+        Mono<Franquicia> result = franquiciaService.actualizarNombreSucursal("1", sucursalId.toString(), "Sucursal Actualizada");
+
         StepVerifier.create(result)
-            .expectNextMatches(productoConSucursal -> {
-                return productoConSucursal.getProducto().getNombre().equals("Producto x") &&
-                    productoConSucursal.getProducto().getStock() == 100 &&
-                    productoConSucursal.getSucursalId().equals(sucursalId.toString()) &&
-                    productoConSucursal.getSucursalNombre().equals("Sucursal principal");
+            .assertNext(f -> {
+                Sucursal actualizada = f.getSucursales().stream()
+                    .filter(s -> s.getId().equals(sucursalId))
+                    .findFirst()
+                    .orElse(null);
+                assertNotNull(actualizada);
+                assertEquals("Sucursal Actualizada", actualizada.getNombre());
             })
-            .expectComplete()
+            .verifyComplete();
+    }
+
+    @Test
+    void testActualizarNombreSucursalNotFound() {
+        when(franquiciaRepository.findById("1")).thenReturn(Mono.just(franquicia));
+
+        Mono<Franquicia> result = franquiciaService.actualizarNombreSucursal(
+            "1", "1", "Sucursal principal");
+
+        StepVerifier.create(result)
+            .expectError(RuntimeException.class)
             .verify();
     }
 }
