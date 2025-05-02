@@ -1,6 +1,7 @@
 package com.prueba.franquicia.controller;
 
 import com.prueba.franquicia.model.Franquicia;
+import com.prueba.franquicia.model.Sucursal;
 import com.prueba.franquicia.service.FranquiciaService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +31,27 @@ public class FranquiciaController {
             @PathVariable String franquiciaId,
             @RequestBody String nuevoNombre) {
         return franquiciaService.actualizarNombreFranquicia(franquiciaId, nuevoNombre)
+                .map(ResponseEntity::ok)
+                .onErrorResume(e -> Mono.just(ResponseEntity.notFound().build()));
+    }
+
+    // Endpoint para agregar una nueva sucursal a una franquicia
+    @PostMapping("/{franquiciaId}/sucursales")
+    public Mono<ResponseEntity<Franquicia>> agregarSucursal(
+            @PathVariable String franquiciaId,
+            @RequestBody Sucursal sucursal) {
+        return franquiciaService.agregarSucursal(franquiciaId, sucursal)
+                .map(f -> ResponseEntity.status(HttpStatus.CREATED).body(f))
+                .onErrorResume(e -> Mono.just(ResponseEntity.status(HttpStatus.NOT_FOUND).build()));
+    }
+
+    // Endpoint para actualizar el nombre de una sucursal
+    @PutMapping("/{franquiciaId}/sucursales/{sucursalId}/nombre")
+    public Mono<ResponseEntity<Franquicia>> actualizarNombreSucursal(
+            @PathVariable String franquiciaId,
+            @PathVariable String sucursalId,
+            @RequestBody String nuevoNombre) {
+        return franquiciaService.actualizarNombreSucursal(franquiciaId, sucursalId, nuevoNombre)
                 .map(ResponseEntity::ok)
                 .onErrorResume(e -> Mono.just(ResponseEntity.notFound().build()));
     }
