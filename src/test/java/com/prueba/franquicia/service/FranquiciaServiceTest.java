@@ -31,11 +31,13 @@ class FranquiciaServiceTest {
     private Sucursal sucursal;
     private Producto producto;
 
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
         franquicia = new Franquicia("Perritos");
         sucursal = new Sucursal("Sucursal 1");
+        producto = new Producto("Producto 1", 50);
     }
 
     @Test
