@@ -15,6 +15,8 @@ import org.bson.types.ObjectId;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 class FranquiciaServiceTest {
@@ -27,6 +29,8 @@ class FranquiciaServiceTest {
 
     private Franquicia franquicia;
     private Sucursal sucursal;
+    private Producto producto;
+
 
     @BeforeEach
     void setUp() {
