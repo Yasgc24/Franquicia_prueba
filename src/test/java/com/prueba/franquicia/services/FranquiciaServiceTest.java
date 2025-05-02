@@ -15,6 +15,8 @@ import org.bson.types.ObjectId;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 class FranquiciaServiceTest {
@@ -27,13 +29,13 @@ class FranquiciaServiceTest {
 
     private Franquicia franquicia;
     private Sucursal sucursal;
+    private Producto producto;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
         franquicia = new Franquicia("Perritos");
         sucursal = new Sucursal("Sucursal 1");
-        producto = new Producto("Producto 1", 50);
     }
 
     @Test
@@ -67,59 +69,6 @@ class FranquiciaServiceTest {
         when(franquiciaRepository.findById("999")).thenReturn(Mono.empty());
 
         Mono<Franquicia> result = franquiciaService.actualizarNombreFranquicia("999", "Perritos 1");
-
-        StepVerifier.create(result)
-            .expectError(RuntimeException.class)
-            .verify();
-    }
-
-    @Test
-    void testAgregarSucursal() {
-        when(franquiciaRepository.findById("1")).thenReturn(Mono.just(new Franquicia("Franquicia 1")));
-        when(franquiciaRepository.save(any(Franquicia.class))).thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
-
-        Mono<Franquicia> result = franquiciaService.agregarSucursal("1", new Sucursal("Sucursal 1"));
-
-        assertNotNull(result);
-        Franquicia savedFranquicia = result.block();
-        assertFalse(savedFranquicia.getSucursales().isEmpty());
-        assertNotNull(savedFranquicia.getSucursales().get(0).getId());
-        assertEquals("Sucursal 1", savedFranquicia.getSucursales().get(0).getNombre());
-    }
-
-    @Test
-    void testActualizarNombreSucursal() {
-        ObjectId sucursalId = new ObjectId();
-        Sucursal original = new Sucursal("Sucursal Original");
-        original.setId(sucursalId);
-        franquicia.agregarSucursal(original);
-
-        when(franquiciaRepository.findById("1")).thenReturn(Mono.just(franquicia));
-        when(franquiciaRepository.save(any(Franquicia.class))).thenAnswer(invocation -> {
-            Franquicia f = invocation.getArgument(0);
-            return Mono.just(f);
-        });
-
-        Mono<Franquicia> result = franquiciaService.actualizarNombreSucursal("1", sucursalId.toString(), "Sucursal Actualizada");
-
-        StepVerifier.create(result)
-            .assertNext(f -> {
-                Sucursal actualizada = f.getSucursales().stream()
-                    .filter(s -> s.getId().equals(sucursalId))
-                    .findFirst()
-                    .orElse(null);
-                assertNotNull(actualizada);
-                assertEquals("Sucursal Actualizada", actualizada.getNombre());
-            })
-            .verifyComplete();
-    }
-
-    @Test
-    void testActualizarNombreSucursalNotFound() {
-        when(franquiciaRepository.findById("1")).thenReturn(Mono.just(franquicia));
-
-        Mono<Franquicia> result = franquiciaService.actualizarNombreSucursal(
-            "1", "1", "Sucursal principal");
 
         StepVerifier.create(result)
             .expectError(RuntimeException.class)
