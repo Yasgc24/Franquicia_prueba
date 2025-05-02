@@ -32,6 +32,8 @@ class FranquiciaServiceTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
         franquicia = new Franquicia("Perritos");
+        sucursal = new Sucursal("Sucursal 1");
+        producto = new Producto("Producto 1", 50);
     }
 
     @Test
@@ -52,10 +54,11 @@ class FranquiciaServiceTest {
             return Mono.just(f);
         });
 
-        Mono<Franquicia> result = franquiciaService.actualizarNombreFranquicia("1", "Perritos 1");
+        String nuevoNombre = "Perritos 1";
+        Mono<Franquicia> result = franquiciaService.actualizarNombreFranquicia("1", nuevoNombre);
 
         StepVerifier.create(result)
-            .expectNextMatches(f -> "Franquicia Actualizada".equals(f.getNombre()))
+            .expectNextMatches(f -> nuevoNombre.equals(f.getNombre()))
             .verifyComplete();
     }
 
