@@ -33,13 +33,6 @@ La aplicación está configurada para conectarse a MongoDB Atlas o de manera loc
 5. En la sección "Clusters", haz clic en "Connect" y selecciona "Connect your application".
 6. Copia la cadena de conexión proporcionada.
 
-### Opción 2: MongoDB Local
-
-1. Instala MongoDB en tu máquina local.
-2. Inicia el servicio de MongoDB.
-
-### Configuración de Variables de Entorno
-
 Para MongoDB Atlas, debes modificar el archivo `application.properties`, y configurar las variables de entorno:
 
 ```properties
@@ -52,6 +45,11 @@ MONGODB_USER=tu_usuario
 MONGODB_PASSWORD=tu_contraseña
 MONGODB_CLUSTER=tu_cluster.mongodb.net
 ```
+
+### Opción 2: MongoDB Local
+
+1. Instala MongoDB en tu máquina local.
+2. Inicia el servicio de MongoDB.
 
 Para MongoDB local, puedes modificar el archivo `application.properties` para usar una conexión local:
 
@@ -74,26 +72,6 @@ spring.data.mongodb.uri=mongodb://localhost:27017/franquicias_db
 
 ```bash
 ./gradlew test
-```
-
-La aplicación estará disponible en `http://localhost:8080`.
-
-### Ejecución con Docker
-
-1. Construye la imagen Docker:
-
-```bash
-docker build -t franquicia-api .
-```
-
-2. Ejecuta un contenedor con la imagen creada:
-
-```bash
-docker run -p 8080:8080 \
-  -e MONGODB_USER=tu_usuario \
-  -e MONGODB_PASSWORD=tu_contraseña \
-  -e MONGODB_CLUSTER=tu_cluster.mongodb.net \
-  franquicia-api
 ```
 
 La aplicación estará disponible en `http://localhost:8080`.
