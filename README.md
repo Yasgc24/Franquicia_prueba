@@ -39,8 +39,8 @@ Para MongoDB Atlas, debes modificar el archivo `application.properties`, y confi
 spring.data.mongodb.uri=mongodb+srv://${MONGODB_USER}:${MONGODB_PASSWORD}@${MONGODB_CLUSTER}.mongodb.net/franquicias_db?retryWrites=true&w=majority
 ```
 
-Asegúrate de definir estas variables de entorno:
-```
+Crea un archivo `.env` en la raíz del proyecto, con las siguientes variables:
+```.env
 MONGODB_USER=tu_usuario
 MONGODB_PASSWORD=tu_contraseña
 MONGODB_CLUSTER=tu_cluster.mongodb.net
@@ -54,7 +54,7 @@ MONGODB_CLUSTER=tu_cluster.mongodb.net
 Para MongoDB local, puedes modificar el archivo `application.properties` para usar una conexión local:
 
 ```properties
-spring.data.mongodb.uri=mongodb://localhost:27017/franquicias_db
+spring.data.mongodb.uri=mongodb://localhost:27017/test_db
 ```
 
 ## Ejecución del Proyecto
@@ -124,15 +124,31 @@ Deberías recibir una respuesta JSON con la franquicia creada.
 - **nombre**: String
 - **stock**: Integer (cantidad disponible)
 
+## DTOs (Data Transfer Objects)
+
+### NombreDTO
+
+- **nombre**: String (utilizado para actualizar nombres)
+
+### StockDTO
+
+- **stock**: Integer (utilizado para actualizar el stock de productos)
+
+### ProductoConSucursalDTO
+
+- **producto**: Objeto Producto
+- **sucursalId**: String (ID de la sucursal)
+- **sucursalNombre**: String (Nombre de la sucursal)
+
 ## Manejo de Errores
 
-La API maneja los siguientes escenarios de error:
+La API maneja los siguientes errores:
 
-| Código HTTP | Descripción                                          | Formato de Respuesta                                    |
-| ----------- | ---------------------------------------------------- | ------------------------------------------------------- |
-| 400         | Solicitud incorrecta (datos inválidos)               | `{"mensaje": "Descripción del error"}`                  |
-| 404         | Recurso no encontrado                                | `{"mensaje": "El recurso {id} no fue encontrado"}`      |
-| 500         | Error interno del servidor                           | `{"mensaje": "Error interno del servidor"}`             |
+| Código HTTP | Descripción                                          |
+| ----------- | ---------------------------------------------------- |
+| 400         | Solicitud incorrecta (datos inválidos)               |
+| 404         | Recurso no encontrado                                |
+| 500         | Error interno del servidor                           |
 
 ## API REST
 
@@ -192,14 +208,16 @@ Content-Type: application/json
 PUT /api/franquicias/645a32b8c12d4f5e6a7b8c9d/nombre
 Content-Type: application/json
 
-"Franquicia principal"
+{
+  "nombre": "Franquicia Actualizada"
+}
 ```
 
 **Ejemplo de respuesta**:
 ```json
 {
   "id": "645a32b8c12d4f5e6a7b8c9d",
-  "nombre": "Franquicia principal",
+  "nombre": "Franquicia Actualizada",
   "sucursales": []
 }
 ```
@@ -256,7 +274,9 @@ Content-Type: application/json
 PUT /api/franquicias/645a32b8c12d4f5e6a7b8c9d/sucursales/645a33c9d12e5f6a7b8c9d0/nombre
 Content-Type: application/json
 
-"Sucursal principal"
+{
+  "nombre": "Sucursal Actualizada"
+}
 ```
 
 **Ejemplo de respuesta**:
@@ -267,7 +287,7 @@ Content-Type: application/json
   "sucursales": [
     {
       "id": "645a33c9d12e5f6a7b8c9d0",
-      "nombre": "Sucursal principal",
+      "nombre": "Sucursal Actualizada",
       "productos": []
     }
   ]
@@ -333,7 +353,9 @@ Content-Type: application/json
 PUT /api/franquicias/645a32b8c12d4f5e6a7b8c9d/sucursales/645a33c9d12e5f6a7b8c9d0/productos/645a34dae23f6g7h8i9j0k1/nombre
 Content-Type: application/json
 
-"Helados de chocolate"
+{
+  "nombre": "Producto Actualizado",
+}
 ```
 
 **Ejemplo de respuesta**:
@@ -348,7 +370,7 @@ Content-Type: application/json
       "productos": [
         {
           "id": "645a34dae23f6g7h8i9j0k1",
-          "nombre": "Helados de chocolate",
+          "nombre": "Producto Actualizado",
           "stock": 50
         }
       ]
@@ -372,7 +394,9 @@ Content-Type: application/json
 PUT /api/franquicias/645a32b8c12d4f5e6a7b8c9d/sucursales/645a33c9d12e5f6a7b8c9d0/productos/645a34dae23f6g7h8i9j0k1/stock
 Content-Type: application/json
 
-30
+{
+  "stock": 60
+}
 ```
 
 **Ejemplo de respuesta**:
@@ -388,7 +412,7 @@ Content-Type: application/json
         {
           "id": "645a34dae23f6g7h8i9j0k1",
           "nombre": "Helados de chocolate",
-          "stock": 30
+          "stock": 60
         }
       ]
     }
