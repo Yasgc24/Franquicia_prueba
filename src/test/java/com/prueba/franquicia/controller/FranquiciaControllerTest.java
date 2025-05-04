@@ -1,5 +1,8 @@
 package com.prueba.franquicia.controller;
 
+import com.prueba.franquicia.dto.NombreDTO;
+import com.prueba.franquicia.dto.StockDTO;
+import com.prueba.franquicia.dto.ProductoConSucursalDTO;
 import com.prueba.franquicia.model.Franquicia;
 import com.prueba.franquicia.model.Producto;
 import com.prueba.franquicia.model.Sucursal;
@@ -68,11 +71,12 @@ class FranquiciaControllerTest {
 
     @Test
     void testActualizarNombreFranquicia() {
+        NombreDTO nombreDTO = new NombreDTO("Franquicia Actualizada");
         when(franquiciaService.actualizarNombreFranquicia(anyString(), anyString()))
                 .thenReturn(Mono.just(franquicia));
 
         Mono<ResponseEntity<Franquicia>> resultado = franquiciaController
-                .actualizarNombreFranquicia("1", "Franquicia Actualizada");
+                .actualizarNombreFranquicia("1", nombreDTO);
 
         StepVerifier.create(resultado)
                 .assertNext(responseEntity -> {
@@ -83,11 +87,12 @@ class FranquiciaControllerTest {
 
     @Test
     void testActualizarNombreFranquiciaNotFound() {
+        NombreDTO nombreDTO = new NombreDTO("Franquicia Actualizada");
         when(franquiciaService.actualizarNombreFranquicia(anyString(), anyString()))
                 .thenReturn(Mono.error(new RuntimeException("Franquicia no encontrada")));
 
         Mono<ResponseEntity<Franquicia>> resultado = franquiciaController
-                .actualizarNombreFranquicia("999", "Franquicia Actualizada");
+                .actualizarNombreFranquicia("999", nombreDTO);
 
         StepVerifier.create(resultado)
                 .assertNext(responseEntity -> {
@@ -129,11 +134,12 @@ class FranquiciaControllerTest {
 
     @Test
     void testActualizarNombreSucursal() {
+        NombreDTO nombreDTO = new NombreDTO("Sucursal Actualizada");
         when(franquiciaService.actualizarNombreSucursal(anyString(), anyString(), anyString()))
                 .thenReturn(Mono.just(franquicia));
 
         Mono<ResponseEntity<Franquicia>> resultado = franquiciaController
-                .actualizarNombreSucursal("1", "Sucursal Test", "Sucursal Actualizada");
+                .actualizarNombreSucursal("1", "Sucursal Test", nombreDTO);
 
         StepVerifier.create(resultado)
                 .assertNext(responseEntity -> {
@@ -144,11 +150,12 @@ class FranquiciaControllerTest {
 
     @Test
     void testActualizarNombreSucursalNotFound() {
+        NombreDTO nombreDTO = new NombreDTO("Sucursal Actualizada");
         when(franquiciaService.actualizarNombreSucursal(anyString(), anyString(), anyString()))
                 .thenReturn(Mono.error(new RuntimeException("Sucursal no encontrada")));
 
         Mono<ResponseEntity<Franquicia>> resultado = franquiciaController
-                .actualizarNombreSucursal("1", "Sucursal Inexistente", "Sucursal Actualizada");
+                .actualizarNombreSucursal("1", "Sucursal Inexistente", nombreDTO);
 
         StepVerifier.create(resultado)
                 .assertNext(responseEntity -> {
@@ -190,11 +197,12 @@ class FranquiciaControllerTest {
 
     @Test
     void testActualizarNombreProducto() {
+        NombreDTO nombreDTO = new NombreDTO("Producto Actualizado");
         when(franquiciaService.actualizarNombreProducto(anyString(), anyString(), anyString(), anyString()))
                 .thenReturn(Mono.just(franquicia));
 
         Mono<ResponseEntity<Franquicia>> resultado = franquiciaController
-                .actualizarNombreProducto("1", "Sucursal Test", "Producto Test", "Producto Actualizado");
+                .actualizarNombreProducto("1", "Sucursal Test", "Producto Test", nombreDTO);
 
         StepVerifier.create(resultado)
                 .assertNext(responseEntity -> {
@@ -205,11 +213,12 @@ class FranquiciaControllerTest {
 
     @Test
     void testActualizarNombreProductoNotFound() {
+        NombreDTO nombreDTO = new NombreDTO("Producto Actualizado");
         when(franquiciaService.actualizarNombreProducto(anyString(), anyString(), anyString(), anyString()))
                 .thenReturn(Mono.error(new RuntimeException("Producto no encontrado")));
 
         Mono<ResponseEntity<Franquicia>> resultado = franquiciaController
-                .actualizarNombreProducto("1", "Sucursal Test", "Producto Inexistente", "Producto Actualizado");
+                .actualizarNombreProducto("1", "Sucursal Test", "Producto Inexistente", nombreDTO);
 
         StepVerifier.create(resultado)
                 .assertNext(responseEntity -> {
@@ -243,18 +252,19 @@ class FranquiciaControllerTest {
         
         StepVerifier.create(resultado)
         .assertNext(responseEntity -> {
-                assertEquals(HttpStatus.NOT_FOUND, responseEntity.getStatusCode()); // Verifica el estado Not Found
+                assertEquals(HttpStatus.NOT_FOUND, responseEntity.getStatusCode());
         })
         .verifyComplete();
-}
+    }
 
     @Test
     void testModificarStockProducto() {
+        StockDTO stockDTO = new StockDTO(20);
         when(franquiciaService.modificarStock(anyString(), anyString(), anyString(), anyInt()))
                 .thenReturn(Mono.just(franquicia));
 
         Mono<ResponseEntity<Franquicia>> resultado = franquiciaController
-                .modificarStockProducto("1", "Sucursal Test", "Producto Test", 20);
+                .modificarStockProducto("1", "Sucursal Test", "Producto Test", stockDTO);
 
         StepVerifier.create(resultado)
                 .assertNext(responseEntity -> {
@@ -265,11 +275,12 @@ class FranquiciaControllerTest {
 
     @Test
     void testModificarStockProductoNotFound() {
+        StockDTO stockDTO = new StockDTO(20);
         when(franquiciaService.modificarStock(anyString(), anyString(), anyString(), anyInt()))
                 .thenReturn(Mono.error(new RuntimeException("Producto no encontrado")));
 
         Mono<ResponseEntity<Franquicia>> resultado = franquiciaController
-                .modificarStockProducto("1", "Sucursal Test", "Producto Inexistente", 20);
+                .modificarStockProducto("1", "Sucursal Test", "Producto Inexistente", stockDTO);
 
         StepVerifier.create(resultado)
                 .assertNext(responseEntity -> {
@@ -285,18 +296,18 @@ class FranquiciaControllerTest {
         Producto producto1 = new Producto("Producto X", 10);
         Producto producto2 = new Producto("Producto Y", 20);
         
-        FranquiciaService.ProductoConSucursal productoConSucursal1 = 
-                new FranquiciaService.ProductoConSucursal(producto1, "123", "Sucursal X");
-        FranquiciaService.ProductoConSucursal productoConSucursal2 = 
-                new FranquiciaService.ProductoConSucursal(producto2, "145", "Sucursal Y");
+        ProductoConSucursalDTO productoConSucursal1 = 
+                new ProductoConSucursalDTO(producto1, "123", "Sucursal X");
+        ProductoConSucursalDTO productoConSucursal2 = 
+                new ProductoConSucursalDTO(producto2, "145", "Sucursal Y");
         
-        List<FranquiciaService.ProductoConSucursal> productosConStock = 
+        List<ProductoConSucursalDTO> productosConStock = 
                 Arrays.asList(productoConSucursal1, productoConSucursal2);
 
         when(franquiciaService.productoConMasStockPorSucursal(franquiciaId))
                 .thenReturn(Flux.fromIterable(productosConStock));
 
-        Flux<FranquiciaService.ProductoConSucursal> response = 
+        Flux<ProductoConSucursalDTO> response = 
                 franquiciaController.productoConMasStockPorSucursal(franquiciaId);
 
         StepVerifier.create(response)

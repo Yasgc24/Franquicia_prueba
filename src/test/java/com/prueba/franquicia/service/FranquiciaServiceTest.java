@@ -4,7 +4,6 @@ import com.prueba.franquicia.model.Franquicia;
 import com.prueba.franquicia.model.Sucursal;
 import com.prueba.franquicia.model.Producto;
 import com.prueba.franquicia.repository.FranquiciaRepository;
-import com.prueba.franquicia.service.FranquiciaService.ProductoConSucursal;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,7 +12,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
-import reactor.core.publisher.Flux;
 import org.bson.types.ObjectId;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -31,16 +29,12 @@ class FranquiciaServiceTest {
     private FranquiciaService franquiciaService;
 
     private Franquicia franquicia;
-    private Sucursal sucursal;
-    private Producto producto;
-
-
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
         franquicia = new Franquicia("Perritos");
-        sucursal = new Sucursal("Sucursal 1");
-        producto = new Producto("Producto 1", 50);
+        new Sucursal("Sucursal 1");
+        new Producto("Producto 1", 50);
     }
 
     @Test
@@ -233,8 +227,6 @@ class FranquiciaServiceTest {
 
     @Test
     void testProductoConMasStockPorSucursal() {
-        ObjectId franquiciaId = new ObjectId();
-
         ObjectId sucursalId = new ObjectId();
         Sucursal original = new Sucursal("Sucursal Original");
         original.setId(sucursalId);
