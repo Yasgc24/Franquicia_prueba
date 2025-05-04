@@ -57,7 +57,32 @@ Para MongoDB local, puedes modificar el archivo `application.properties` para us
 spring.data.mongodb.uri=mongodb://localhost:27017/test_db
 ```
 
+## Tecnologías
+
+| Herramienta                              | Uso                                    |
+| ---------------------------------------- | -------------------------------------- |
+| Java 17                                  | Lenguaje de programación               |
+| Spring Boot 3 + WebFlux                  | Framework backend reactivo             |
+| MongoDB                                  | Base de datos                          |
+| Gradle                                   | Gestión de dependencias y construcción |
+| Docker *(opcional)*                      | Empaquetado de la aplicación           |
+| JUnit 5                                  | Pruebas unitarias                      |
+
 ## Ejecución del Proyecto
+
+### Ejecución con Docker
+
+1. Navega hasta el directorio raíz del proyecto.
+2. Construye la imagen de Docker:
+
+```bash
+docker build -t franquicias_api .
+```
+3. Inicia la aplicación con Docker Compose:
+
+```bash
+docker-compose up
+```
 
 ### Ejecución con Gradle
 
@@ -95,17 +120,6 @@ Deberías recibir una respuesta JSON con la franquicia creada.
 - Modificar el stock de productos.
 - Eliminar productos.
 - Consultar el producto con más stock por sucursal dentro de una franquicia.
-
-## Tecnologías
-
-| Herramienta                              | Uso                                    |
-| ---------------------------------------- | -------------------------------------- |
-| Java 17                                  | Lenguaje de programación               |
-| Spring Boot 3 + WebFlux                  | Framework backend reactivo             |
-| MongoDB                                  | Base de datos                          |
-| Gradle                                   | Gestión de dependencias y construcción |
-| Docker *(opcional)*                      | Empaquetado de la aplicación           |
-| JUnit 5                                  | Pruebas unitarias                      |
 
 ## Modelo de Datos
 
