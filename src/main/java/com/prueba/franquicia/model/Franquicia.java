@@ -8,14 +8,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
 @Document(collection = "franquicias")
 public class Franquicia {
 
     @Id
     private String id;
-    private String nombre;
+        private String nombre;
     private List<Sucursal> sucursales = new ArrayList<>();
 
     public Franquicia(String nombre) {
