@@ -3,6 +3,9 @@ package com.prueba.franquicia.controller;
 import com.prueba.franquicia.model.Franquicia;
 import com.prueba.franquicia.model.Producto;
 import com.prueba.franquicia.model.Sucursal;
+import com.prueba.franquicia.dto.NombreDTO;
+import com.prueba.franquicia.dto.StockDTO;
+import com.prueba.franquicia.dto.ProductoConSucursalDTO;
 import com.prueba.franquicia.service.FranquiciaService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,8 +34,8 @@ public class FranquiciaController {
     @PutMapping("/{franquiciaId}/nombre")
     public Mono<ResponseEntity<Franquicia>> actualizarNombreFranquicia(
             @PathVariable String franquiciaId,
-            @RequestBody String nuevoNombre) {
-        return franquiciaService.actualizarNombreFranquicia(franquiciaId, nuevoNombre)
+            @RequestBody NombreDTO nombreDTO) {
+        return franquiciaService.actualizarNombreFranquicia(franquiciaId, nombreDTO.getNombre())
                 .map(ResponseEntity::ok)
                 .onErrorResume(e -> Mono.just(ResponseEntity.notFound().build()));
     }
@@ -52,8 +55,8 @@ public class FranquiciaController {
     public Mono<ResponseEntity<Franquicia>> actualizarNombreSucursal(
             @PathVariable String franquiciaId,
             @PathVariable String sucursalId,
-            @RequestBody String nuevoNombre) {
-        return franquiciaService.actualizarNombreSucursal(franquiciaId, sucursalId, nuevoNombre)
+            @RequestBody NombreDTO nombreDTO) {
+        return franquiciaService.actualizarNombreSucursal(franquiciaId, sucursalId, nombreDTO.getNombre())
                 .map(ResponseEntity::ok)
                 .onErrorResume(e -> Mono.just(ResponseEntity.notFound().build()));
     }
@@ -75,8 +78,8 @@ public class FranquiciaController {
             @PathVariable String franquiciaId,
             @PathVariable String sucursalId,
             @PathVariable String productoId,
-            @RequestBody String nuevoNombre) {
-        return franquiciaService.actualizarNombreProducto(franquiciaId, sucursalId, productoId, nuevoNombre)
+            @RequestBody NombreDTO nombreDTO) {
+        return franquiciaService.actualizarNombreProducto(franquiciaId, sucursalId, productoId, nombreDTO.getNombre())
                 .map(ResponseEntity::ok)
                 .onErrorResume(e -> Mono.just(ResponseEntity.notFound().build()));
     }
@@ -98,16 +101,15 @@ public class FranquiciaController {
             @PathVariable String franquiciaId,
             @PathVariable String sucursalId,
             @PathVariable String productoId,
-            @RequestBody Integer stock) {
-        return franquiciaService.modificarStock(franquiciaId, sucursalId, productoId, stock)
+            @RequestBody StockDTO stockDTO) {
+        return franquiciaService.modificarStock(franquiciaId, sucursalId, productoId, stockDTO.getStock())
                 .map(ResponseEntity::ok)
                 .onErrorResume(e -> Mono.just(ResponseEntity.notFound().build()));
     }
 
     // Endpoint para obtener el producto con más stock por sucursal para una franquicia
     @GetMapping("/{franquiciaId}/productos/mas-stock")
-    public Flux<FranquiciaService.ProductoConSucursal> productoConMasStockPorSucursal(@PathVariable String franquiciaId) {
+    public Flux<ProductoConSucursalDTO> productoConMasStockPorSucursal(@PathVariable String franquiciaId) {
         return franquiciaService.productoConMasStockPorSucursal(franquiciaId);
     }
-
 }
