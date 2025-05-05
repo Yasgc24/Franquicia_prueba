@@ -43,7 +43,7 @@ Crea un archivo `.env` en la raíz del proyecto, con las siguientes variables:
 ```.env
 MONGODB_USER=tu_usuario
 MONGODB_PASSWORD=tu_contraseña
-MONGODB_CLUSTER=tu_cluster.mongodb.net
+MONGODB_CLUSTER=tu_cluster
 JWT_SECRET=tu_clave_secreta_jwt_muy_segura
 JWT_EXPIRATION=86400
 ```
