@@ -44,6 +44,8 @@ Crea un archivo `.env` en la raíz del proyecto, con las siguientes variables:
 MONGODB_USER=tu_usuario
 MONGODB_PASSWORD=tu_contraseña
 MONGODB_CLUSTER=tu_cluster.mongodb.net
+JWT_SECRET=tu_clave_secreta_jwt_muy_segura
+JWT_EXPIRATION=86400
 ```
 
 ### Opción 2: MongoDB Local
@@ -63,6 +65,8 @@ spring.data.mongodb.uri=mongodb://localhost:27017/test_db
 | ---------------------------------------- | -------------------------------------- |
 | Java 17                                  | Lenguaje de programación               |
 | Spring Boot 3 + WebFlux                  | Framework backend reactivo             |
+| Spring Security                          | Seguridad y autenticación              |
+| JWT (JSON Web Token)                     | Autenticación basada en tokens         |
 | MongoDB                                  | Base de datos                          |
 | Gradle                                   | Gestión de dependencias y construcción |
 | Docker *(opcional)*                      | Empaquetado de la aplicación           |
@@ -101,13 +105,113 @@ docker-compose up
 
 La aplicación estará disponible en `http://localhost:8080`.
 
+## Sistema de Autenticación
+
+La API utiliza autenticación basada en JWT (JSON Web Token) para proteger los endpoints. Todos los endpoints, excepto los de autenticación, requieren un token JWT válido.
+
+### Configuración de Seguridad
+
+El archivo `.env` debe incluir las siguientes variables para la configuración de JWT:
+
+```
+JWT_SECRET=clave_secreta_para_firmar_tokens
+JWT_EXPIRATION=86400
+```
+
+- `JWT_SECRET`: Una cadena secreta utilizada para firmar los tokens JWT.
+- `JWT_EXPIRATION`: Tiempo de expiración del token en segundos (86400 = 24 horas).
+
+### Endpoints de Autenticación
+
+#### Registro de Usuario
+
+**Endpoint**: `POST /api/auth/register`
+
+**Descripción**: Crea un nuevo usuario en el sistema.
+
+**Ejemplo de petición**:
+```http
+POST /api/auth/register
+Content-Type: application/json
+
+{
+  "username": "usuario1",
+  "password": "contraseña123"
+}
+```
+
+**Ejemplo de respuesta**:
+```json
+{
+  "id": "645a32b8c12d4f5e6a7b8c9d",
+  "username": "usuario1",
+  "enabled": true
+}
+```
+
+**Código de estado**: 201 (Created)
+
+#### Inicio de Sesión
+
+**Endpoint**: `POST /api/auth/login`
+
+**Descripción**: Autentica un usuario y devuelve un token JWT.
+
+**Ejemplo de petición**:
+```http
+POST /api/auth/login
+Content-Type: application/json
+
+{
+  "username": "usuario1",
+  "password": "contraseña123"
+}
+```
+
+**Ejemplo de respuesta**:
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "username": "usuario1"
+}
+```
+
+**Código de estado**: 200 (OK)
+
+### Uso del Token de Autenticación
+
+Para usar el token en las peticiones a la API, debes incluirlo en la cabecera `Authorization` con el prefijo `Bearer `:
+
+```http
+GET /api/franquicias
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+### Usuario Administrador por Defecto
+
+La aplicación crea automáticamente un usuario administrador al iniciarse:
+
+- **Username**: admin
+- **Password**: admin123
+
+Este usuario puede ser utilizado para pruebas iniciales.
+
 ## Verificación de la Instalación
 
-Para verificar que la API está funcionando correctamente, puedes realizar una petición POST a uno de los endpoints de la API:
+Para verificar que la API está funcionando correctamente, primero debes obtener un token de autenticación:
+
+```bash
+curl -X POST http://localhost:8080/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username": "admin", "password": "admin123"}'
+```
+
+Luego, usa el token para realizar una petición a un endpoint protegido:
 
 ```bash
 curl -X POST http://localhost:8080/api/franquicias \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TU_TOKEN_JWT" \
   -d '{"nombre": "Mi Franquicia"}'
 ```
 
@@ -138,6 +242,12 @@ Deberías recibir una respuesta JSON con la franquicia creada.
 - **nombre**: String
 - **stock**: Integer (cantidad disponible)
 
+### Usuario
+- **id**: String (ObjectId de MongoDB)
+- **username**: String
+- **password**: String (encriptado)
+- **enabled**: Boolean
+
 ## DTOs (Data Transfer Objects)
 
 ### NombreDTO
@@ -154,6 +264,21 @@ Deberías recibir una respuesta JSON con la franquicia creada.
 - **sucursalId**: String (ID de la sucursal)
 - **sucursalNombre**: String (Nombre de la sucursal)
 
+### AuthRequest
+
+- **username**: String
+- **password**: String
+
+### AuthResponse
+
+- **token**: String (token JWT)
+- **username**: String
+
+### RegisterRequest
+
+- **username**: String
+- **password**: String
+
 ## Manejo de Errores
 
 La API maneja los siguientes errores:
@@ -161,6 +286,8 @@ La API maneja los siguientes errores:
 | Código HTTP | Descripción                                          |
 | ----------- | ---------------------------------------------------- |
 | 400         | Solicitud incorrecta (datos inválidos)               |
+| 401         | No autorizado (token inválido o expirado)            |
+| 403         | Prohibido (sin permisos suficientes)                 |
 | 404         | Recurso no encontrado                                |
 | 500         | Error interno del servidor                           |
 
@@ -168,6 +295,8 @@ La API maneja los siguientes errores:
 
 | Método   | URL                                                                                     | Descripción                                  |
 | -------- | --------------------------------------------------------------------------------------- | -------------------------------------------- |
+| `POST`   | `/api/auth/register`                                                                    | Registrar nuevo usuario                      |
+| `POST`   | `/api/auth/login`                                                                       | Iniciar sesión y obtener token               |
 | `POST`   | `/api/franquicias`                                                                      | Crear una nueva franquicia                   |
 | `PUT`    | `/api/franquicias/{franquiciaId}/nombre`                                                | Actualizar nombre franquicia                 |
 | `POST`   | `/api/franquicias/{franquiciaId}/sucursales`                                            | Agregar sucursal                             |
@@ -182,6 +311,63 @@ La API maneja los siguientes errores:
 
 Esta guía detalla todos los endpoints disponibles en la API del Sistema de Gestión de Franquicias, junto con ejemplos de peticiones y respuestas.
 
+## Autenticación
+
+### Registrar un nuevo usuario
+
+**Endpoint**: `POST /api/auth/register`
+
+**Descripción**: Crea un nuevo usuario en el sistema.
+
+**Ejemplo de petición**:
+```http
+POST /api/auth/register
+Content-Type: application/json
+
+{
+  "username": "usuario1",
+  "password": "contraseña123"
+}
+```
+
+**Ejemplo de respuesta**:
+```json
+{
+  "id": "645a32b8c12d4f5e6a7b8c9d",
+  "username": "usuario1",
+  "enabled": true
+}
+```
+
+**Código de estado**: 201 (Created)
+
+### Iniciar sesión
+
+**Endpoint**: `POST /api/auth/login`
+
+**Descripción**: Autentica un usuario y devuelve un token JWT.
+
+**Ejemplo de petición**:
+```http
+POST /api/auth/login
+Content-Type: application/json
+
+{
+  "username": "usuario1",
+  "password": "contraseña123"
+}
+```
+
+**Ejemplo de respuesta**:
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "username": "usuario1"
+}
+```
+
+**Código de estado**: 200 (OK)
+
 ## Gestión de Franquicias
 
 ### Crear una nueva franquicia
@@ -190,10 +376,16 @@ Esta guía detalla todos los endpoints disponibles en la API del Sistema de Gest
 
 **Descripción**: Crea una nueva franquicia en el sistema.
 
+**Headers necesarios**:
+```
+Authorization: Bearer {tu_token_jwt}
+```
+
 **Ejemplo de petición**:
 ```http
 POST /api/franquicias
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
 {
   "nombre": "Franquicia 1"
@@ -217,10 +409,16 @@ Content-Type: application/json
 
 **Descripción**: Actualiza el nombre de una franquicia existente.
 
+**Headers necesarios**:
+```
+Authorization: Bearer {tu_token_jwt}
+```
+
 **Ejemplo de petición**:
 ```http
 PUT /api/franquicias/645a32b8c12d4f5e6a7b8c9d/nombre
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
 {
   "nombre": "Franquicia Actualizada"
@@ -248,10 +446,16 @@ Content-Type: application/json
 
 **Descripción**: Agrega una nueva sucursal a una franquicia existente.
 
+**Headers necesarios**:
+```
+Authorization: Bearer {tu_token_jwt}
+```
+
 **Ejemplo de petición**:
 ```http
 POST /api/franquicias/645a32b8c12d4f5e6a7b8c9d/sucursales
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
 {
   "nombre": "Sucursal 1"
@@ -283,10 +487,16 @@ Content-Type: application/json
 
 **Descripción**: Actualiza el nombre de una sucursal existente.
 
+**Headers necesarios**:
+```
+Authorization: Bearer {tu_token_jwt}
+```
+
 **Ejemplo de petición**:
 ```http
 PUT /api/franquicias/645a32b8c12d4f5e6a7b8c9d/sucursales/645a33c9d12e5f6a7b8c9d0/nombre
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
 {
   "nombre": "Sucursal Actualizada"
@@ -320,10 +530,16 @@ Content-Type: application/json
 
 **Descripción**: Agrega un nuevo producto a una sucursal existente.
 
+**Headers necesarios**:
+```
+Authorization: Bearer {tu_token_jwt}
+```
+
 **Ejemplo de petición**:
 ```http
 POST /api/franquicias/645a32b8c12d4f5e6a7b8c9d/sucursales/645a33c9d12e5f6a7b8c9d0/productos
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
 {
   "nombre": "Helados",
@@ -362,10 +578,16 @@ Content-Type: application/json
 
 **Descripción**: Actualiza el nombre de un producto existente.
 
+**Headers necesarios**:
+```
+Authorization: Bearer {tu_token_jwt}
+```
+
 **Ejemplo de petición**:
 ```http
 PUT /api/franquicias/645a32b8c12d4f5e6a7b8c9d/sucursales/645a33c9d12e5f6a7b8c9d0/productos/645a34dae23f6g7h8i9j0k1/nombre
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
 {
   "nombre": "Producto Actualizado",
@@ -403,10 +625,16 @@ Content-Type: application/json
 
 **Descripción**: Modifica la cantidad de stock disponible de un producto.
 
+**Headers necesarios**:
+```
+Authorization: Bearer {tu_token_jwt}
+```
+
 **Ejemplo de petición**:
 ```http
 PUT /api/franquicias/645a32b8c12d4f5e6a7b8c9d/sucursales/645a33c9d12e5f6a7b8c9d0/productos/645a34dae23f6g7h8i9j0k1/stock
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
 {
   "stock": 60
@@ -444,9 +672,15 @@ Content-Type: application/json
 
 **Descripción**: Elimina un producto de una sucursal.
 
+**Headers necesarios**:
+```
+Authorization: Bearer {tu_token_jwt}
+```
+
 **Ejemplo de petición**:
 ```http
 DELETE /api/franquicias/645a32b8c12d4f5e6a7b8c9d/sucursales/645a33c9d12e5f6a7b8c9d0/productos/645a34dae23f6g7h8i9j0k1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```
 
 **Respuesta**: No contiene cuerpo.
@@ -461,9 +695,15 @@ DELETE /api/franquicias/645a32b8c12d4f5e6a7b8c9d/sucursales/645a33c9d12e5f6a7b8c
 
 **Descripción**: Devuelve el producto con mayor stock de cada sucursal de una franquicia.
 
+**Headers necesarios**:
+```
+Authorization: Bearer {tu_token_jwt}
+```
+
 **Ejemplo de petición**:
 ```http
 GET /api/franquicias/645a32b8c12d4f5e6a7b8c9d/productos/mas-stock
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```
 
 **Ejemplo de respuesta**:
@@ -494,7 +734,12 @@ GET /api/franquicias/645a32b8c12d4f5e6a7b8c9d/productos/mas-stock
 
 ## Seguridad
 
-Esta API actualmente no implementa mecanismos de autenticación ni autorización.
+La API implementa las siguientes medidas de seguridad:
+
+- Autenticación basada en JWT
+- Contraseñas cifradas con BCrypt
+- Control de acceso basado en tokens
+- Protección contra CSRF desactivada para facilitar el uso de la API
 
 ## Contacto
 
