@@ -76,16 +76,16 @@ class FranquiciaServiceTest {
 
     @Test
     void testAgregarSucursal() {
-        when(franquiciaRepository.findById("1")).thenReturn(Mono.just(new Franquicia("Franquicia 1"))); // Devuelve una NUEVA instancia
-        when(franquiciaRepository.save(any(Franquicia.class))).thenAnswer(invocation -> Mono.just(invocation.getArgument(0))); // Simplemente devuelve el objeto guardado
+        when(franquiciaRepository.findById("1")).thenReturn(Mono.just(new Franquicia("Franquicia 1")));
+        when(franquiciaRepository.save(any(Franquicia.class))).thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
 
         Mono<Franquicia> result = franquiciaService.agregarSucursal("1", new Sucursal("Sucursal 1"));
 
         assertNotNull(result);
         Franquicia savedFranquicia = result.block();
         assertFalse(savedFranquicia.getSucursales().isEmpty());
-        assertNotNull(savedFranquicia.getSucursales().get(0).getId()); // Verifica que el ID no sea nulo
-        assertEquals("Sucursal 1", savedFranquicia.getSucursales().get(0).getNombre()); // Verifica el nombre
+        assertNotNull(savedFranquicia.getSucursales().get(0).getId());
+        assertEquals("Sucursal 1", savedFranquicia.getSucursales().get(0).getNombre());
     }
 
     @Test
